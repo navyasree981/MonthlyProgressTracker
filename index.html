@@ -20,6 +20,7 @@
         --accent-yellow: #fff27a;
         --accent-red: #f37373;
         --accent-orange: #f5a855;
+        --accent-purple: #b388ff;
         --text-primary: #e8eaf2;
         --text-secondary: #9aa1b8;
         --border: #2a3547;
@@ -39,7 +40,6 @@
         overflow-x: hidden;
       }
 
-      /* Background effect */
       body::before {
         content: "";
         position: fixed;
@@ -235,9 +235,9 @@
 
       .current-date {
         font-family: "Space Mono", monospace;
-        font-size: 1.3rem;
+        font-size: 1.1rem;
         font-weight: 700;
-        min-width: 200px;
+        min-width: 220px;
         text-align: center;
       }
 
@@ -288,10 +288,25 @@
       .toggle-btn:hover {
         color: var(--text-primary);
       }
-
       .toggle-btn.active {
         background: var(--accent-green);
         color: var(--bg-primary);
+      }
+
+      /* Schedule badge for Sundays */
+      .sunday-badge {
+        display: inline-block;
+        background: rgba(179, 136, 255, 0.2);
+        color: var(--accent-purple);
+        border: 1px solid rgba(179, 136, 255, 0.4);
+        border-radius: 8px;
+        padding: 4px 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-left: 12px;
+        font-family: "Space Mono", monospace;
       }
 
       /* Task Checklist */
@@ -315,6 +330,10 @@
       .task-item:hover {
         border-color: var(--task-color);
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      }
+
+      .task-item.completed-item {
+        opacity: 0.75;
       }
 
       .task-checkbox {
@@ -413,15 +432,27 @@
         background: rgba(95, 209, 122, 0.2);
         color: var(--accent-green);
       }
-
       .status-partial {
         background: rgba(255, 242, 122, 0.2);
         color: var(--accent-yellow);
       }
-
       .status-skipped {
         background: rgba(243, 115, 115, 0.2);
         color: var(--accent-red);
+      }
+
+      /* Section divider for task groups */
+      .task-group-header {
+        font-family: "Space Mono", monospace;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        padding: 4px 0 8px 4px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 4px;
+        margin-top: 8px;
       }
 
       /* Monthly Calendar */
@@ -468,17 +499,29 @@
         box-shadow: 0 0 20px rgba(95, 209, 122, 0.3);
       }
 
+      .calendar-day.sunday-day {
+        border-color: rgba(179, 136, 255, 0.3);
+      }
+
       .day-number {
         font-family: "Space Mono", monospace;
         font-size: 1.2rem;
         font-weight: 700;
-        margin-bottom: 8px;
+        margin-bottom: 4px;
+      }
+
+      .day-dow {
+        font-size: 0.65rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
       }
 
       .day-completion {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: var(--text-secondary);
-        margin-bottom: 8px;
+        margin-bottom: 6px;
       }
 
       .day-dots {
@@ -528,7 +571,6 @@
         background: var(--accent-green);
         color: var(--bg-primary);
       }
-
       .btn-primary:hover {
         background: var(--accent-blue);
         transform: translateY(-2px);
@@ -540,10 +582,20 @@
         color: var(--text-primary);
         border: 1px solid var(--border);
       }
-
       .btn-secondary:hover {
         border-color: var(--accent-pink);
         color: var(--accent-pink);
+        transform: translateY(-2px);
+      }
+
+      .btn-danger {
+        background: var(--bg-card);
+        color: var(--accent-red);
+        border: 1px solid rgba(243, 115, 115, 0.3);
+      }
+      .btn-danger:hover {
+        background: rgba(243, 115, 115, 0.15);
+        border-color: var(--accent-red);
         transform: translateY(-2px);
       }
 
@@ -569,23 +621,19 @@
         }
       }
 
-      /* Responsive */
       @media (max-width: 768px) {
         h1 {
           font-size: 2.5rem;
         }
-
         .task-item {
           grid-template-columns: auto 1fr;
           gap: 12px;
         }
-
         .task-hours,
         .progress-bar-container,
         .task-status {
           grid-column: 2;
         }
-
         .calendar-grid {
           grid-template-columns: repeat(4, 1fr);
         }
@@ -599,9 +647,7 @@
         <div class="subtitle">Progress Tracker</div>
       </header>
 
-      <div class="dashboard" id="dashboard">
-        <!-- Stats will be populated by JavaScript -->
-      </div>
+      <div class="dashboard" id="dashboard"></div>
 
       <div class="daily-view">
         <div class="daily-header">
@@ -631,9 +677,7 @@
           </div>
         </div>
 
-        <div class="task-checklist" id="taskChecklist">
-          <!-- Tasks will be populated by JavaScript -->
-        </div>
+        <div class="task-checklist" id="taskChecklist"></div>
 
         <div class="action-buttons">
           <button class="action-btn btn-primary" onclick="saveDailyProgress()">
@@ -642,318 +686,333 @@
           <button class="action-btn btn-secondary" onclick="exportData()">
             Export Data
           </button>
+          <button class="action-btn btn-danger" onclick="resetData()">
+            Reset All
+          </button>
         </div>
       </div>
 
       <div class="monthly-view">
-        <h2 class="section-title">Study - Monthly Overview</h2>
-        <div class="calendar-grid" id="studyCalendarGrid">
-          <!-- Study calendar will be populated by JavaScript -->
-        </div>
+        <h2 class="section-title">Study — Monthly Overview</h2>
+        <div class="calendar-grid" id="studyCalendarGrid"></div>
 
         <h2 class="section-title" style="margin-top: 60px">
-          Wellness - Monthly Overview
+          Wellness — Monthly Overview
         </h2>
-        <div class="calendar-grid" id="wellnessCalendarGrid">
-          <!-- Wellness calendar will be populated by JavaScript -->
-        </div>
+        <div class="calendar-grid" id="wellnessCalendarGrid"></div>
       </div>
     </div>
 
     <script>
-      // Task definitions separated by category
+      // ─────────────────────────────────────────────
+      // SCHEDULE (based on updated timetable)
+      //
+      // Every day:
+      //   7:00 AM  Yoga        (30 min)
+      //   7:30 AM  Workout     (1 hr)
+      //   8:30 AM  Breakfast   (1 hr)
+      //  12:30 PM  Lunch       (1 hr)
+      //   4:30 PM  Mid-day snack (30 min)
+      //   8:00 PM  Dinner      (1 hr)
+      //  10:40 PM  Sleep       (8 hrs)
+      //
+      // Mon–Sat:
+      //   9:30 AM  Java        (3 hrs → until 12:30 PM)
+      //   1:30 PM  MERN        (3 hrs → until 4:30 PM)
+      //   5:00 PM  AI/ML       (3 hrs → until 8:00 PM)
+      //   9:00 PM  Research    (Mon, Wed, Fri) OR IELTS (Tue, Thu, Sat)  (1h40m)
+      //
+      // Sunday (Build Day):
+      //   9:30 AM  Build       (3 hrs)
+      //   1:30 PM  Build       (3 hrs)
+      //   5:00 PM  Build       (3 hrs)
+      //   9:00 PM  Build       (1h40m)
+      // ─────────────────────────────────────────────
+
       const wellnessTasks = [
         {
-          id: "sleep",
-          name: "Sleep",
-          color: "#3c64c8",
-          scheduledHours: 8,
-          schedule: "11:00 PM - 7:00 AM",
+          id: "yoga",
+          name: "Yoga",
+          color: "#fff27a",
+          scheduledHours: 0.5,
+          schedule: "7:00 AM – 7:30 AM",
         },
         {
           id: "workout",
           name: "Workout",
           color: "#f37373",
           scheduledHours: 1,
-          schedule: "7:00 AM",
-        },
-        {
-          id: "yoga",
-          name: "Yoga",
-          color: "#fff27a",
-          scheduledHours: 0.5,
-          schedule: "8:00 AM",
+          schedule: "7:30 AM – 8:30 AM",
         },
         {
           id: "breakfast",
           name: "Breakfast",
-          color: "#fff27a",
+          color: "#f5a855",
           scheduledHours: 1,
-          schedule: "8:30 AM",
-        },
-        {
-          id: "midday",
-          name: "Mid-day Snack",
-          color: "#fff27a",
-          scheduledHours: 0.5,
-          schedule: "11:30 AM",
+          schedule: "8:30 AM – 9:30 AM",
         },
         {
           id: "lunch",
           name: "Lunch",
-          color: "#fff27a",
+          color: "#f5a855",
           scheduledHours: 1,
-          schedule: "2:00 PM",
+          schedule: "12:30 PM – 1:30 PM",
         },
         {
-          id: "skincare",
-          name: "Skin & Body Care",
-          color: "#fff27a",
-          scheduledHours: 1,
-          schedule: "5:00 PM",
+          id: "midday",
+          name: "Mid-day Snack",
+          color: "#f5a855",
+          scheduledHours: 0.5,
+          schedule: "4:30 PM – 5:00 PM",
         },
         {
           id: "dinner",
           name: "Dinner",
-          color: "#fff27a",
+          color: "#f5a855",
           scheduledHours: 1,
-          schedule: "8:00 PM",
+          schedule: "8:00 PM – 9:00 PM",
+        },
+        {
+          id: "sleep",
+          name: "Sleep",
+          color: "#3c64c8",
+          scheduledHours: 8,
+          schedule: "10:40 PM – 7:00 AM",
         },
       ];
 
-      const studyTasks = [
+      // Study tasks for Mon–Sat
+      const studyTasksWeekday = [
         {
           id: "java",
-          name: "Java Study",
+          name: "Java",
           color: "#fd8fe4",
           scheduledHours: 3,
-          schedule: "Multiple sessions",
+          schedule: "9:30 AM – 12:30 PM",
+        },
+        {
+          id: "mern",
+          name: "MERN Stack",
+          color: "#b388ff",
+          scheduledHours: 3,
+          schedule: "1:30 PM – 4:30 PM",
         },
         {
           id: "aiml",
-          name: "AI/ML Study",
+          name: "AI/ML",
           color: "#74e4f7",
           scheduledHours: 3,
-          schedule: "Multiple sessions",
-        },
-        {
-          id: "practice",
-          name: "Practice Sessions",
-          color: "#c6e3ee",
-          scheduledHours: 2,
-          schedule: "Morning & Afternoon",
+          schedule: "5:00 PM – 8:00 PM",
         },
         {
           id: "research",
           name: "Research",
           color: "#5fd17a",
-          scheduledHours: 2,
-          schedule: "9:00 PM - 11:00 PM",
+          scheduledHours: 1.67,
+          schedule: "9:00 PM – 10:40 PM",
         },
         {
           id: "ielts",
-          name: "IELTS Preparation",
+          name: "IELTS Prep",
           color: "#f5a855",
-          scheduledHours: 2,
-          schedule: "Tuesday, Thursday, Saturday",
+          scheduledHours: 1.67,
+          schedule: "9:00 PM – 10:40 PM",
         },
       ];
 
-      const allTasks = [...wellnessTasks, ...studyTasks];
+      // Study tasks for Sunday (Build Day)
+      const studyTasksSunday = [
+        {
+          id: "build_am",
+          name: "Build Session 1",
+          color: "#b388ff",
+          scheduledHours: 3,
+          schedule: "9:30 AM – 12:30 PM",
+        },
+        {
+          id: "build_pm",
+          name: "Build Session 2",
+          color: "#b388ff",
+          scheduledHours: 3,
+          schedule: "1:30 PM – 4:30 PM",
+        },
+        {
+          id: "build_eve",
+          name: "Build Session 3",
+          color: "#b388ff",
+          scheduledHours: 3,
+          schedule: "5:00 PM – 8:00 PM",
+        },
+        {
+          id: "build_ngt",
+          name: "Build Session 4",
+          color: "#b388ff",
+          scheduledHours: 1.67,
+          schedule: "9:00 PM – 10:40 PM",
+        },
+      ];
 
-      // Initialize data structure
+      const allTaskIds = [
+        ...wellnessTasks.map((t) => t.id),
+        ...studyTasksWeekday.map((t) => t.id),
+        ...studyTasksSunday.map((t) => t.id),
+      ];
+
+      // Day-of-week for Feb 1 2026 = Sunday (0)
+      function getDayOfWeek(day) {
+        return new Date(2026, 1, day).getDay(); // 0=Sun, 1=Mon…6=Sat
+      }
+
+      function isSunday(day) {
+        return getDayOfWeek(day) === 0;
+      }
+
+      // Returns which study tasks are scheduled on a given day
+      function getStudyTasksForDay(day) {
+        if (isSunday(day)) return studyTasksSunday;
+        const dow = getDayOfWeek(day);
+        // Research: Mon(1), Wed(3), Fri(5)  |  IELTS: Tue(2), Thu(4), Sat(6)
+        if ([1, 3, 5].includes(dow))
+          return studyTasksWeekday.filter((t) => t.id !== "ielts");
+        return studyTasksWeekday.filter((t) => t.id !== "research");
+      }
+
+      function getTasksForDay(day, view) {
+        if (view === "wellness") return wellnessTasks;
+        return getStudyTasksForDay(day);
+      }
+
+      // All tasks that could ever appear (for initializing storage)
+      const allTaskDefs = [
+        ...wellnessTasks,
+        ...studyTasksWeekday,
+        ...studyTasksSunday,
+      ];
+
+      // ─── Data ───────────────────────────────────────
       let progressData = loadProgressData();
-      let currentDay = new Date(); // Use actual current date
-      let currentView = localStorage.getItem("currentView") || "study"; // 'study' or 'wellness'
+      let currentDay = new Date();
+      // Clamp currentDay to February 2026
+      if (currentDay.getFullYear() !== 2026 || currentDay.getMonth() !== 1) {
+        currentDay = new Date(2026, 1, 12); // default to mid-month
+      }
+      let currentView = localStorage.getItem("currentView") || "study";
 
       function loadProgressData() {
-        let data = JSON.parse(localStorage.getItem("februaryProgress"));
+        let data = JSON.parse(localStorage.getItem("februaryProgress2026v2"));
+        if (!data) return initializeMonth();
 
-        if (!data) {
-          return initializeMonth();
-        }
-
-        // Migrate old data to include new wellness tasks
+        // Ensure all task slots exist (migration-safe)
         for (let day = 1; day <= 28; day++) {
-          if (!data[day]) {
-            data[day] = { tasks: {}, notes: "" };
-          }
-
-          // Add any missing tasks
-          allTasks.forEach((task) => {
+          if (!data[day]) data[day] = { tasks: {}, notes: "" };
+          allTaskDefs.forEach((task) => {
             if (!data[day].tasks[task.id]) {
-              data[day].tasks[task.id] = {
-                completed: false,
-                hoursLogged: 0,
-                status: "pending",
-              };
+              data[day].tasks[task.id] = { completed: false, hoursLogged: 0 };
             }
           });
         }
-
-        // Save migrated data
-        localStorage.setItem("februaryProgress", JSON.stringify(data));
+        localStorage.setItem("februaryProgress2026v2", JSON.stringify(data));
         return data;
       }
 
       function initializeMonth() {
         const data = {};
         for (let day = 1; day <= 28; day++) {
-          // February 2026 has 28 days (not a leap year)
-          data[day] = {
-            tasks: {},
-            notes: "",
-          };
-          allTasks.forEach((task) => {
-            data[day].tasks[task.id] = {
-              completed: false,
-              hoursLogged: 0,
-              status: "pending", // pending, complete, partial, skipped
-            };
+          data[day] = { tasks: {}, notes: "" };
+          allTaskDefs.forEach((task) => {
+            data[day].tasks[task.id] = { completed: false, hoursLogged: 0 };
           });
         }
         return data;
       }
 
-      function getDayOfWeek(day) {
-        const date = new Date(2026, 1, day);
-        return date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      function saveData() {
+        localStorage.setItem(
+          "februaryProgress2026v2",
+          JSON.stringify(progressData),
+        );
       }
 
-      function getTasksForDay(day, view = currentView) {
-        const dayOfWeek = getDayOfWeek(day);
-
-        if (view === "wellness") {
-          // Wellness tasks are the same every day
-          return wellnessTasks;
-        }
-
-        // Study tasks vary by day
-        // Sunday has different schedule
-        if (dayOfWeek === 0) {
-          return studyTasks.filter((t) => ["practice"].includes(t.id));
-        }
-
-        // Tuesday, Thursday, Saturday have IELTS instead of Research
-        if ([2, 4, 6].includes(dayOfWeek)) {
-          return studyTasks.filter((t) => t.id !== "research");
-        }
-
-        // Other days have Research instead of IELTS
-        return studyTasks.filter((t) => t.id !== "ielts");
-      }
-
+      // ─── Dashboard ───────────────────────────────────
       function renderDashboard() {
         const dashboard = document.getElementById("dashboard");
+        const today = currentDay.getDate();
+        let totalLogged = 0,
+          totalScheduled = 0,
+          lazyHours = 0,
+          consistentDays = 0;
 
-        // Calculate stats based on current view
-        let totalHoursLogged = 0;
-        let totalScheduledHours = 0;
-        let lazyHours = 0;
-        let consistentDays = 0;
-        let completionRates = {};
-
-        const tasksToTrack =
-          currentView === "study" ? studyTasks : wellnessTasks;
-
-        tasksToTrack.forEach((task) => {
-          completionRates[task.id] = { logged: 0, scheduled: 0 };
-        });
-
-        const today = new Date().getDate(); // Use actual current date
-
-        for (let day = 1; day <= 28; day++) {
-          const dayData = progressData[day];
+        for (let day = 1; day <= today; day++) {
           const dayTasks = getTasksForDay(day, currentView);
-
-          let dayComplete = true;
+          let dayDone = true;
           dayTasks.forEach((task) => {
-            const taskData = dayData.tasks[task.id];
-
-            // Only count stats for days up to today
-            if (day <= today) {
-              totalHoursLogged += taskData.hoursLogged || 0;
-              totalScheduledHours += task.scheduledHours;
-
-              completionRates[task.id].logged += taskData.hoursLogged || 0;
-              completionRates[task.id].scheduled += task.scheduledHours;
-
-              // Count any unlogged hours as lazy hours
-              const unloggedHours =
-                task.scheduledHours - (taskData.hoursLogged || 0);
-              if (unloggedHours > 0) {
-                lazyHours += unloggedHours;
-              }
-
-              if (!taskData.completed) {
-                dayComplete = false;
-              }
-            }
+            const td = progressData[day].tasks[task.id];
+            totalLogged += td.hoursLogged || 0;
+            totalScheduled += task.scheduledHours;
+            const gap = task.scheduledHours - (td.hoursLogged || 0);
+            if (gap > 0) lazyHours += gap;
+            if (!td.completed) dayDone = false;
           });
-
-          if (dayComplete && day <= today) consistentDays++;
+          if (dayDone) consistentDays++;
         }
 
-        const consistencyRate =
-          totalScheduledHours > 0
-            ? ((totalHoursLogged / totalScheduledHours) * 100).toFixed(1)
+        const pct =
+          totalScheduled > 0
+            ? ((totalLogged / totalScheduled) * 100).toFixed(1)
             : "0.0";
         const viewLabel = currentView === "study" ? "Study" : "Wellness";
 
         dashboard.innerHTML = `
-        <div class="stat-card" style="--accent-color: #5fd17a">
-          <div class="stat-label">${viewLabel} Hours Logged</div>
-          <div class="stat-value">${totalHoursLogged.toFixed(1)}</div>
-          <div class="stat-subtext">of ${totalScheduledHours} scheduled</div>
-        </div>
-        
-        <div class="stat-card" style="--accent-color: #74e4f7">
-          <div class="stat-label">${viewLabel} Consistency</div>
-          <div class="stat-value">${consistencyRate}%</div>
-          <div class="stat-subtext">${consistentDays} fully consistent days</div>
-        </div>
-        
-        <div class="stat-card" style="--accent-color: #f37373">
-          <div class="stat-label">${viewLabel} Lazy Hours</div>
-          <div class="stat-value">${lazyHours.toFixed(1)}</div>
-          <div class="stat-subtext">Hours not logged</div>
-        </div>
-        
-        <div class="stat-card" style="--accent-color: #fd8fe4">
-          <div class="stat-label">${viewLabel} Streak</div>
-          <div class="stat-value">${calculateStreak()}</div>
-          <div class="stat-subtext">consecutive days</div>
-        </div>
-      `;
+          <div class="stat-card" style="--accent-color:#5fd17a">
+            <div class="stat-label">${viewLabel} Hours Logged</div>
+            <div class="stat-value">${totalLogged.toFixed(1)}</div>
+            <div class="stat-subtext">of ${totalScheduled.toFixed(1)} scheduled</div>
+          </div>
+          <div class="stat-card" style="--accent-color:#74e4f7">
+            <div class="stat-label">${viewLabel} Consistency</div>
+            <div class="stat-value">${pct}%</div>
+            <div class="stat-subtext">${consistentDays} fully consistent day${consistentDays !== 1 ? "s" : ""}</div>
+          </div>
+          <div class="stat-card" style="--accent-color:#f37373">
+            <div class="stat-label">${viewLabel} Lazy Hours</div>
+            <div class="stat-value">${lazyHours.toFixed(1)}</div>
+            <div class="stat-subtext">Hours not logged</div>
+          </div>
+          <div class="stat-card" style="--accent-color:#fd8fe4">
+            <div class="stat-label">${viewLabel} Streak</div>
+            <div class="stat-value">${calculateStreak()}</div>
+            <div class="stat-subtext">consecutive days</div>
+          </div>
+        `;
       }
 
       function calculateStreak() {
         let streak = 0;
         const today = currentDay.getDate();
-
         for (let day = today; day >= 1; day--) {
-          const dayData = progressData[day];
           const dayTasks = getTasksForDay(day, currentView);
-          let dayComplete = true;
-
-          dayTasks.forEach((task) => {
-            if (!dayData.tasks[task.id].completed) {
-              dayComplete = false;
-            }
-          });
-
-          if (dayComplete) {
-            streak++;
-          } else {
-            break;
-          }
+          const allDone = dayTasks.every(
+            (t) => progressData[day].tasks[t.id].completed,
+          );
+          if (allDone) streak++;
+          else break;
         }
-
         return streak;
       }
 
+      // ─── Daily View ──────────────────────────────────
       function renderDailyView() {
         const day = currentDay.getDate();
+        const dow = getDayOfWeek(day);
+        const dowNames = [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ];
         const dateStr = currentDay.toLocaleDateString("en-US", {
           weekday: "long",
           year: "numeric",
@@ -961,9 +1020,12 @@
           day: "numeric",
         });
 
-        document.getElementById("currentDate").textContent = dateStr;
+        const sundayBadge = isSunday(day)
+          ? `<span class="sunday-badge">🔨 Build Day</span>`
+          : "";
+        document.getElementById("currentDate").innerHTML =
+          dateStr + sundayBadge;
 
-        // Update toggle button states
         document
           .getElementById("studyBtn")
           .classList.toggle("active", currentView === "study");
@@ -976,56 +1038,52 @@
         const checklist = document.getElementById("taskChecklist");
 
         if (dayTasks.length === 0) {
-          checklist.innerHTML = `
-          <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
-            <p style="font-size: 1.2rem;">No ${currentView} tasks scheduled for this day</p>
-          </div>
-        `;
+          checklist.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-secondary)">
+            No ${currentView} tasks scheduled for today.</div>`;
           return;
         }
 
         checklist.innerHTML = dayTasks
           .map((task) => {
-            const taskData = dayData.tasks[task.id] || {
+            const td = dayData.tasks[task.id] || {
               completed: false,
               hoursLogged: 0,
             };
-            const progress = (taskData.hoursLogged / task.scheduledHours) * 100;
-            const statusClass = taskData.completed
+            const pct = Math.min(
+              (td.hoursLogged / task.scheduledHours) * 100,
+              100,
+            );
+            const statusClass = td.completed
               ? "status-complete"
-              : taskData.hoursLogged > 0
+              : td.hoursLogged > 0
                 ? "status-partial"
                 : "status-skipped";
-            const statusText = taskData.completed
+            const statusText = td.completed
               ? "Complete"
-              : taskData.hoursLogged > 0
+              : td.hoursLogged > 0
                 ? "Partial"
                 : "Pending";
 
             return `
-          <div class="task-item" style="--task-color: ${task.color}">
-            <div class="task-checkbox ${taskData.completed ? "checked" : ""}" 
-                 onclick="toggleTask('${task.id}')"></div>
-            <div class="task-info">
-              <div class="task-name">${task.name}</div>
-              <div class="task-schedule">${task.schedule} • ${task.scheduledHours}h scheduled</div>
+            <div class="task-item ${td.completed ? "completed-item" : ""}" style="--task-color:${task.color}">
+              <div class="task-checkbox ${td.completed ? "checked" : ""}" onclick="toggleTask('${task.id}')"></div>
+              <div class="task-info">
+                <div class="task-name">${task.name}</div>
+                <div class="task-schedule">${task.schedule} &nbsp;·&nbsp; ${task.scheduledHours}h scheduled</div>
+              </div>
+              <div class="task-hours">
+                <input type="number" class="hours-input"
+                       value="${td.hoursLogged}"
+                       min="0" max="${task.scheduledHours * 2}" step="0.25"
+                       onchange="updateHours('${task.id}', this.value)">
+                <span class="hours-label">hrs</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar" style="width:${pct}%; background:${task.color}"></div>
+              </div>
+              <div class="task-status ${statusClass}">${statusText}</div>
             </div>
-            <div class="task-hours">
-              <input type="number" 
-                     class="hours-input" 
-                     value="${taskData.hoursLogged}" 
-                     min="0" 
-                     max="${task.scheduledHours * 2}" 
-                     step="0.5"
-                     onchange="updateHours('${task.id}', this.value)">
-              <span class="hours-label">hours</span>
-            </div>
-            <div class="progress-bar-container">
-              <div class="progress-bar" style="width: ${Math.min(progress, 100)}%; background: ${task.color}"></div>
-            </div>
-            <div class="task-status ${statusClass}">${statusText}</div>
-          </div>
-        `;
+          `;
           })
           .join("");
       }
@@ -1040,18 +1098,14 @@
 
       function toggleTask(taskId) {
         const day = currentDay.getDate();
-        const taskData = progressData[day].tasks[taskId];
-        taskData.completed = !taskData.completed;
-
-        // Auto-set hours to scheduled if completing, reset to 0 if unchecking
-        if (taskData.completed && taskData.hoursLogged === 0) {
-          const task = allTasks.find((t) => t.id === taskId);
-          taskData.hoursLogged = task.scheduledHours;
-        } else if (!taskData.completed) {
-          // Reset hours to 0 when unchecking
-          taskData.hoursLogged = 0;
+        const td = progressData[day].tasks[taskId];
+        td.completed = !td.completed;
+        if (td.completed && td.hoursLogged === 0) {
+          const task = allTaskDefs.find((t) => t.id === taskId);
+          td.hoursLogged = task.scheduledHours;
+        } else if (!td.completed) {
+          td.hoursLogged = 0;
         }
-
         saveData();
         renderDailyView();
         renderDashboard();
@@ -1060,80 +1114,85 @@
 
       function updateHours(taskId, hours) {
         const day = currentDay.getDate();
-        const taskData = progressData[day].tasks[taskId];
-        const task = allTasks.find((t) => t.id === taskId);
-
-        taskData.hoursLogged = parseFloat(hours) || 0;
-        taskData.completed = taskData.hoursLogged >= task.scheduledHours;
-
+        const td = progressData[day].tasks[taskId];
+        const task = allTaskDefs.find((t) => t.id === taskId);
+        td.hoursLogged = parseFloat(hours) || 0;
+        td.completed = td.hoursLogged >= task.scheduledHours;
         saveData();
         renderDailyView();
         renderDashboard();
         renderCalendar();
       }
 
+      // ─── Calendar ────────────────────────────────────
       function renderCalendar() {
         renderCalendarForView("study", "studyCalendarGrid");
         renderCalendarForView("wellness", "wellnessCalendarGrid");
       }
 
+      const DOW_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
       function renderCalendarForView(view, gridId) {
         const grid = document.getElementById(gridId);
-        const today = new Date().getDate(); // Use actual current date
-
+        const today = new Date().getDate();
         let html = "";
 
         for (let day = 1; day <= 28; day++) {
           const dayData = progressData[day];
           const dayTasks = getTasksForDay(day, view);
+          const dow = getDayOfWeek(day);
+          const sun = isSunday(day);
 
-          let completedTasks = 0;
-          dayTasks.forEach((task) => {
-            if (dayData.tasks[task.id].completed) {
-              completedTasks++;
-            }
-          });
-
-          const completionRate =
+          const done = dayTasks.filter(
+            (t) => dayData.tasks[t.id].completed,
+          ).length;
+          const pct =
             dayTasks.length > 0
-              ? ((completedTasks / dayTasks.length) * 100).toFixed(0)
-              : "0";
+              ? Math.round((done / dayTasks.length) * 100)
+              : 0;
           const isToday = day === today;
-          const isHighProductivity = completionRate >= 80;
+          const highProd = pct >= 80;
 
           html += `
-          <div class="calendar-day ${isToday ? "today" : ""} ${isHighProductivity ? "high-productivity" : ""}" 
-               onclick="goToDayWithView(${day}, '${view}')">
-            <div class="day-number">${day}</div>
-            <div class="day-completion">${completionRate}% complete</div>
-            <div class="day-dots">
-              ${dayTasks
-                .slice(0, 12)
-                .map((task) => {
-                  const isDone = dayData.tasks[task.id].completed;
-                  return `<div class="dot" style="--dot-color: ${isDone ? task.color : "#2a3547"}"></div>`;
-                })
-                .join("")}
+            <div class="calendar-day ${isToday ? "today" : ""} ${highProd ? "high-productivity" : ""} ${sun ? "sunday-day" : ""}"
+                 onclick="goToDayWithView(${day}, '${view}')">
+              <div class="day-number">${day}</div>
+              <div class="day-dow">${DOW_SHORT[dow]}</div>
+              <div class="day-completion">${pct}%</div>
+              <div class="day-dots">
+                ${dayTasks
+                  .slice(0, 12)
+                  .map((t) => {
+                    const isDone = dayData.tasks[t.id].completed;
+                    return `<div class="dot" style="--dot-color:${isDone ? t.color : "#2a3547"}"></div>`;
+                  })
+                  .join("")}
+              </div>
             </div>
-          </div>
-        `;
+          `;
         }
-
         grid.innerHTML = html;
       }
 
+      // ─── Navigation ──────────────────────────────────
       function changeDay(delta) {
-        const newDay = currentDay.getDate() + delta;
-        if (newDay >= 1 && newDay <= 28) {
-          currentDay = new Date(2026, 1, newDay);
+        const nd = currentDay.getDate() + delta;
+        if (nd >= 1 && nd <= 28) {
+          currentDay = new Date(2026, 1, nd);
           renderDailyView();
+          renderDashboard();
         }
       }
 
-      function goToDay(day) {
-        currentDay = new Date(2026, 1, day);
+      function goToToday() {
+        const today = new Date();
+        if (today.getFullYear() === 2026 && today.getMonth() === 1) {
+          currentDay = today;
+        } else {
+          currentDay = new Date(2026, 1, 12);
+        }
         renderDailyView();
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        renderDashboard();
       }
 
       function goToDayWithView(day, view) {
@@ -1145,32 +1204,34 @@
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
-      function goToToday() {
-        currentDay = new Date(); // Use actual current date
-        renderDailyView();
-      }
-
+      // ─── Actions ─────────────────────────────────────
       function saveDailyProgress() {
         saveData();
         window.scrollTo({ top: 0, behavior: "instant" });
         location.reload();
       }
 
-      function saveData() {
-        localStorage.setItem("februaryProgress", JSON.stringify(progressData));
-      }
-
       function exportData() {
-        const dataStr = JSON.stringify(progressData, null, 2);
-        const dataBlob = new Blob([dataStr], { type: "application/json" });
-        const url = URL.createObjectURL(dataBlob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "february-2026-progress.json";
-        link.click();
+        const out = JSON.stringify(progressData, null, 2);
+        const blob = new Blob([out], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "february-2026-progress.json";
+        a.click();
       }
 
-      // Initialize on load
+      function resetData() {
+        if (!confirm("Reset ALL progress data? This cannot be undone.")) return;
+        localStorage.removeItem("februaryProgress2026v2");
+        progressData = initializeMonth();
+        saveData();
+        renderDashboard();
+        renderDailyView();
+        renderCalendar();
+      }
+
+      // ─── Init ────────────────────────────────────────
       renderDashboard();
       renderDailyView();
       renderCalendar();

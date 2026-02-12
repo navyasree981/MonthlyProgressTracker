@@ -1,116 +1,123 @@
 # February 2026 Progress Tracker
 
-A beautiful progress tracking application for managing study and wellness tasks throughout February 2026.
+A progress tracking app for managing daily Study and Wellness tasks throughout February 2026.
 
-## Deploy to Render
+## Schedule
 
-Follow these steps to deploy this application to Render:
+| Time | Mon–Fri | Saturday | Sunday |
+|------|---------|----------|--------|
+| 7:00 AM | Yoga (30 min) | Yoga | Yoga |
+| 7:30 AM | Workout (1 hr) | Workout | Workout |
+| 8:30 AM | Breakfast | Breakfast | Breakfast |
+| 9:30 AM | Java (3 hrs) | Java | Build Session 1 |
+| 12:30 PM | Lunch | Lunch | Lunch |
+| 1:30 PM | MERN Stack (3 hrs) | MERN Stack | Build Session 2 |
+| 4:30 PM | Mid-day Snack | Mid-day Snack | Mid-day Snack |
+| 5:00 PM | AI/ML (3 hrs) | AI/ML | Build Session 3 |
+| 8:00 PM | Dinner | Dinner | Dinner |
+| 9:00 PM | Research *(Mon/Wed/Fri)* / IELTS *(Tue/Thu/Sat)* | IELTS | Build Session 4 |
+| 10:40 PM | Sleep | Sleep | Sleep |
 
-### Method 1: Deploy from GitHub (Recommended)
+> **Sunday is Build Day** — all study slots are replaced with free-build sessions.
 
-1. **Create a GitHub Repository**
-   - Go to [GitHub](https://github.com) and create a new repository
-   - Name it something like `february-progress-tracker`
-   - Keep it public or private (your choice)
+---
 
-2. **Upload Your Files**
-   - Upload all three files to your GitHub repository:
-     - `index.html`
-     - `server.js`
-     - `package.json`
-   - You can do this via GitHub's web interface or using Git commands:
-     ```bash
-     git init
-     git add .
-     git commit -m "Initial commit"
-     git branch -M main
-     git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-     git push -u origin main
-     ```
+## Project Structure
 
-3. **Deploy on Render**
-   - Go to [Render](https://render.com) and sign up/log in
-   - Click "New +" → "Web Service"
-   - Connect your GitHub account if you haven't already
-   - Select your repository
-   - Configure the service:
-     - **Name**: `february-progress-tracker` (or any name you want)
-     - **Environment**: `Node`
-     - **Build Command**: `npm install`
-     - **Start Command**: `npm start`
-     - **Plan**: Select "Free" plan
-   - Click "Create Web Service"
+```
+february-progress-tracker/
+├── index.html      # Main tracker app (all UI + logic)
+├── server.js       # Express server
+├── package.json    # Dependencies & scripts
+└── README.md       # This file
+```
 
-4. **Wait for Deployment**
-   - Render will automatically build and deploy your app
-   - Once complete, you'll get a URL like: `https://your-app-name.onrender.com`
-
-### Method 2: Deploy without GitHub
-
-1. **Go to Render Dashboard**
-   - Visit [Render](https://render.com) and sign up/log in
-
-2. **Create a New Web Service**
-   - Click "New +" → "Web Service"
-   - Choose "Build and deploy from a Git repository" and connect your GitHub
-   - OR use Render's manual deployment if available in your region
-
-3. **Alternative: Use Static Site (Simpler)**
-   - Since this is just HTML/CSS/JS, you can use Render's Static Site option
-   - Click "New +" → "Static Site"
-   - Connect your GitHub repo
-   - Set:
-     - **Build Command**: (leave empty)
-     - **Publish Directory**: `.` (current directory)
-   - This will serve your `index.html` directly without needing Node.js
-
-### Method 3: Alternative Static Hosting Options
-
-If you want even simpler deployment, consider these alternatives:
-
-**Netlify** (Easiest):
-1. Go to [Netlify](https://netlify.com)
-2. Drag and drop your `index.html` file
-3. Done! You get instant hosting
-
-**Vercel**:
-1. Go to [Vercel](https://vercel.com)
-2. Import your GitHub repository
-3. Deploy with one click
-
-**GitHub Pages** (Free):
-1. Push to GitHub
-2. Go to Settings → Pages
-3. Select your branch and save
-4. Access at `https://YOUR_USERNAME.github.io/YOUR_REPO_NAME`
+---
 
 ## Local Development
-
-To run locally:
 
 ```bash
 npm install
 npm start
 ```
 
-Then open `http://localhost:3000` in your browser.
+Open `http://localhost:3000` in your browser.
+
+For development with auto-restart (Node 18+):
+
+```bash
+npm run dev
+```
+
+---
+
+## Deploy to Render
+
+### Method 1: Deploy from GitHub (Recommended)
+
+1. **Create a GitHub repository** and push all four files:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git branch -M main
+   git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+   git push -u origin main
+   ```
+
+2. **Create a Web Service on Render**
+   - Go to [render.com](https://render.com) → **New +** → **Web Service**
+   - Connect your GitHub account and select your repository
+   - Configure:
+     - **Environment**: `Node`
+     - **Build Command**: `npm install`
+     - **Start Command**: `npm start`
+     - **Plan**: Free
+   - Click **Create Web Service**
+
+3. Your app will be live at `https://your-app-name.onrender.com`
+
+> **Tip:** Render's free tier spins down after inactivity. The `/health` endpoint can be used with an uptime monitor (e.g. [UptimeRobot](https://uptimerobot.com)) to keep it warm.
+
+### Method 2: Static Hosting (Simpler)
+
+Since all logic runs in the browser, you can skip Node entirely and host `index.html` as a static site.
+
+| Platform | Steps |
+|----------|-------|
+| **Netlify** | Drag & drop `index.html` at [netlify.com/drop](https://netlify.com/drop) |
+| **GitHub Pages** | Settings → Pages → select branch → save |
+| **Vercel** | Import GitHub repo → deploy with one click |
+| **Render Static** | New + → Static Site → Publish directory: `.` |
+
+---
 
 ## Features
 
-- **Dual Tracking**: Separate views for Study and Wellness tasks
-- **Daily Task Management**: Check off tasks and log hours
-- **Monthly Calendar**: Visual overview of your progress
-- **Statistics Dashboard**: Track hours, consistency, and streaks
-- **Data Persistence**: All progress saved in browser localStorage
-- **Export Functionality**: Download your progress as JSON
+- **Dual tracking** — separate Study and Wellness views
+- **Smart scheduling** — tasks automatically vary by day of week:
+  - Research on Mon / Wed / Fri
+  - IELTS on Tue / Thu / Sat
+  - Full Build Day on Sundays
+- **Daily checklist** — check off tasks and log actual hours
+- **Progress bars** — visual fill per task based on hours logged
+- **Monthly calendar** — color-coded dot grid for each day
+- **Statistics dashboard** — hours logged, consistency %, lazy hours, streak
+- **Data persistence** — saved to browser `localStorage`
+- **Export** — download full month's data as JSON
+- **Reset** — clear all data and start fresh
+
+---
 
 ## Notes
 
-- All data is stored in your browser's localStorage
-- Clear browser data will reset your progress
-- Use the Export button to backup your data regularly
-- The app is set for February 2026 (28 days)
+- All data is stored in your browser's `localStorage` — clearing browser data will reset progress
+- Use **Export Data** regularly to back up your progress
+- The tracker is fixed to February 2026 (28 days)
+- Progress data is stored under the key `februaryProgress2026v2`
+
+---
 
 ## Support
 
-For issues or questions, please open an issue on GitHub.
+Open an issue on GitHub for bugs or questions.
