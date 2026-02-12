@@ -293,12 +293,28 @@
         color: var(--bg-primary);
       }
 
-      /* Schedule badge for Sundays */
+      /* Sunday badge */
       .sunday-badge {
         display: inline-block;
         background: rgba(179, 136, 255, 0.2);
         color: var(--accent-purple);
         border: 1px solid rgba(179, 136, 255, 0.4);
+        border-radius: 8px;
+        padding: 4px 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-left: 12px;
+        font-family: "Space Mono", monospace;
+      }
+
+      /* Holiday badge */
+      .holiday-badge {
+        display: inline-block;
+        background: rgba(245, 168, 85, 0.2);
+        color: var(--accent-orange);
+        border: 1px solid rgba(245, 168, 85, 0.4);
         border-radius: 8px;
         padding: 4px 12px;
         font-size: 0.8rem;
@@ -441,21 +457,138 @@
         color: var(--accent-red);
       }
 
-      /* Section divider for task groups */
-      .task-group-header {
-        font-family: "Space Mono", monospace;
-        font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: var(--text-secondary);
-        padding: 4px 0 8px 4px;
-        border-bottom: 1px solid var(--border);
-        margin-bottom: 4px;
-        margin-top: 8px;
+      /* ─── Holiday Screen ─────────────────────────── */
+      .holiday-screen {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        text-align: center;
+        gap: 20px;
+        animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
 
-      /* Monthly Calendar */
+      @keyframes popIn {
+        from {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .holiday-emoji {
+        font-size: 5rem;
+        animation: sway 2s ease-in-out infinite;
+      }
+
+      @keyframes sway {
+        0%,
+        100% {
+          transform: rotate(-8deg);
+        }
+        50% {
+          transform: rotate(8deg);
+        }
+      }
+
+      .holiday-message {
+        font-family: "Space Mono", monospace;
+        font-size: 2.4rem;
+        font-weight: 700;
+        background: linear-gradient(
+          135deg,
+          var(--accent-orange),
+          var(--accent-yellow),
+          var(--accent-pink)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -1px;
+      }
+
+      .holiday-sub {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        max-width: 360px;
+        line-height: 1.6;
+      }
+
+      .undo-holiday-btn {
+        margin-top: 12px;
+        background: rgba(243, 115, 115, 0.15);
+        color: var(--accent-red);
+        border: 1px solid rgba(243, 115, 115, 0.35);
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-family: "Space Mono", monospace;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        transition: all 0.2s ease;
+      }
+
+      .undo-holiday-btn:hover {
+        background: rgba(243, 115, 115, 0.28);
+        transform: scale(1.04);
+      }
+
+      /* Holiday toggle button in header */
+      .holiday-toggle-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .holiday-btn {
+        background: transparent;
+        border: 1px solid rgba(245, 168, 85, 0.4);
+        color: var(--accent-orange);
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-family: "Space Mono", monospace;
+        font-weight: 700;
+        font-size: 0.82rem;
+        cursor: pointer;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+      }
+
+      .holiday-btn:hover {
+        background: rgba(245, 168, 85, 0.15);
+        transform: translateY(-1px);
+      }
+
+      .holiday-btn.active {
+        background: rgba(245, 168, 85, 0.25);
+        border-color: var(--accent-orange);
+      }
+
+      .holiday-quota {
+        font-family: "Space Mono", monospace;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 6px 14px;
+        white-space: nowrap;
+      }
+
+      .holiday-quota span {
+        color: var(--accent-orange);
+        font-weight: 700;
+      }
+
+      /* Calendar */
       .monthly-view {
         animation: fadeInUp 0.8s ease-out 0.6s backwards;
       }
@@ -501,6 +634,15 @@
 
       .calendar-day.sunday-day {
         border-color: rgba(179, 136, 255, 0.3);
+      }
+
+      .calendar-day.holiday-day {
+        border-color: rgba(245, 168, 85, 0.5) !important;
+        background: linear-gradient(
+          135deg,
+          rgba(245, 168, 85, 0.08),
+          rgba(253, 143, 228, 0.06)
+        );
       }
 
       .calendar-day.future-day {
@@ -670,6 +812,21 @@
             </div>
             <button class="today-btn" onclick="goToToday()">Today</button>
           </div>
+
+          <!-- Holiday toggle + quota -->
+          <div class="holiday-toggle-wrap">
+            <div class="holiday-quota">
+              Holidays: <span id="holidayCount">0</span>/5 used
+            </div>
+            <button
+              class="holiday-btn"
+              id="holidayToggleBtn"
+              onclick="toggleHoliday()"
+            >
+              🌴 Take Holiday
+            </button>
+          </div>
+
           <div class="view-toggle">
             <button
               class="toggle-btn"
@@ -715,31 +872,7 @@
     </div>
 
     <script>
-      // ─────────────────────────────────────────────
-      // SCHEDULE (based on updated timetable)
-      //
-      // Every day:
-      //   7:00 AM  Yoga        (30 min)
-      //   7:30 AM  Workout     (1 hr)
-      //   8:30 AM  Breakfast   (1 hr)
-      //  12:30 PM  Lunch       (1 hr)
-      //   4:30 PM  Mid-day snack (30 min)
-      //   8:00 PM  Dinner      (1 hr)
-      //  10:40 PM  Sleep       (8 hrs)
-      //
-      // Mon–Sat:
-      //   9:30 AM  Java        (3 hrs → until 12:30 PM)
-      //   1:30 PM  MERN        (3 hrs → until 4:30 PM)
-      //   5:00 PM  AI/ML       (3 hrs → until 8:00 PM)
-      //   9:00 PM  Research    (Mon, Wed, Fri) OR IELTS (Tue, Thu, Sat)  (1h40m)
-      //
-      // Sunday (Build Day):
-      //   9:30 AM  Build       (3 hrs)
-      //   1:30 PM  Build       (3 hrs)
-      //   5:00 PM  Build       (3 hrs)
-      //   9:00 PM  Build       (1h40m)
-      // ─────────────────────────────────────────────
-
+      // ─── Task Definitions ────────────────────────────
       const wellnessTasks = [
         {
           id: "yoga",
@@ -792,7 +925,6 @@
         },
       ];
 
-      // Study tasks for Mon–Sat
       const studyTasksWeekday = [
         {
           id: "java",
@@ -831,7 +963,6 @@
         },
       ];
 
-      // Study tasks for Sunday (Build Day)
       const studyTasksSunday = [
         {
           id: "build_am",
@@ -863,26 +994,24 @@
         },
       ];
 
-      const allTaskIds = [
-        ...wellnessTasks.map((t) => t.id),
-        ...studyTasksWeekday.map((t) => t.id),
-        ...studyTasksSunday.map((t) => t.id),
+      const allTaskDefs = [
+        ...wellnessTasks,
+        ...studyTasksWeekday,
+        ...studyTasksSunday,
       ];
 
-      // Day-of-week for Feb 1 2026 = Sunday (0)
-      function getDayOfWeek(day) {
-        return new Date(2026, 1, day).getDay(); // 0=Sun, 1=Mon…6=Sat
-      }
+      const MAX_HOLIDAYS = 5;
 
+      function getDayOfWeek(day) {
+        return new Date(2026, 1, day).getDay();
+      }
       function isSunday(day) {
         return getDayOfWeek(day) === 0;
       }
 
-      // Returns which study tasks are scheduled on a given day
       function getStudyTasksForDay(day) {
         if (isSunday(day)) return studyTasksSunday;
         const dow = getDayOfWeek(day);
-        // Research: Mon(1), Wed(3), Fri(5)  |  IELTS: Tue(2), Thu(4), Sat(6)
         if ([1, 3, 5].includes(dow))
           return studyTasksWeekday.filter((t) => t.id !== "ielts");
         return studyTasksWeekday.filter((t) => t.id !== "research");
@@ -893,19 +1022,11 @@
         return getStudyTasksForDay(day);
       }
 
-      // All tasks that could ever appear (for initializing storage)
-      const allTaskDefs = [
-        ...wellnessTasks,
-        ...studyTasksWeekday,
-        ...studyTasksSunday,
-      ];
-
-      // ─── Data ───────────────────────────────────────
-      const START_DAY = 12; // Tracking starts Feb 12
+      // ─── Data ────────────────────────────────────────
+      const START_DAY = 12;
 
       let progressData = loadProgressData();
       let currentDay = new Date();
-      // Clamp currentDay to February 2026, minimum START_DAY
       if (currentDay.getFullYear() !== 2026 || currentDay.getMonth() !== 1) {
         currentDay = new Date(2026, 1, START_DAY);
       }
@@ -915,9 +1036,10 @@
         let data = JSON.parse(localStorage.getItem("februaryProgress2026v2"));
         if (!data) return initializeMonth();
 
-        // Ensure all task slots exist (migration-safe)
+        // Migration-safe: ensure all task slots + holiday flag exist
         for (let day = 1; day <= 28; day++) {
-          if (!data[day]) data[day] = { tasks: {}, notes: "" };
+          if (!data[day]) data[day] = { tasks: {}, notes: "", holiday: false };
+          if (data[day].holiday === undefined) data[day].holiday = false;
           allTaskDefs.forEach((task) => {
             if (!data[day].tasks[task.id]) {
               data[day].tasks[task.id] = { completed: false, hoursLogged: 0 };
@@ -931,7 +1053,7 @@
       function initializeMonth() {
         const data = {};
         for (let day = 1; day <= 28; day++) {
-          data[day] = { tasks: {}, notes: "" };
+          data[day] = { tasks: {}, notes: "", holiday: false };
           allTaskDefs.forEach((task) => {
             data[day].tasks[task.id] = { completed: false, hoursLogged: 0 };
           });
@@ -946,6 +1068,48 @@
         );
       }
 
+      // ─── Holiday helpers ─────────────────────────────
+      function countHolidays() {
+        let count = 0;
+        for (let day = 1; day <= 28; day++) {
+          if (progressData[day] && progressData[day].holiday) count++;
+        }
+        return count;
+      }
+
+      function isHolidayDay(day) {
+        return !!(progressData[day] && progressData[day].holiday);
+      }
+
+      function toggleHoliday() {
+        const day = currentDay.getDate();
+        const alreadyHoliday = isHolidayDay(day);
+
+        if (!alreadyHoliday) {
+          const used = countHolidays();
+          if (used >= MAX_HOLIDAYS) {
+            alert(
+              "You've used all 5 holidays for February. No more lazy days! 😄",
+            );
+            return;
+          }
+          // Mark as holiday and clear any logged data for that day
+          progressData[day].holiday = true;
+          allTaskDefs.forEach((task) => {
+            progressData[day].tasks[task.id] = {
+              completed: false,
+              hoursLogged: 0,
+            };
+          });
+        } else {
+          // Undo holiday
+          progressData[day].holiday = false;
+        }
+
+        saveData();
+        renderAll();
+      }
+
       // ─── Dashboard ───────────────────────────────────
       function renderDashboard() {
         const dashboard = document.getElementById("dashboard");
@@ -955,8 +1119,10 @@
           lazyHours = 0,
           consistentDays = 0;
 
-        // Only count from START_DAY onwards
+        // Only count from START_DAY onwards, skip holidays
         for (let day = START_DAY; day <= today; day++) {
+          if (isHolidayDay(day)) continue; // skip holidays entirely
+
           const dayTasks = getTasksForDay(day, currentView);
           let dayDone = true;
           dayTasks.forEach((task) => {
@@ -975,8 +1141,20 @@
             ? ((totalLogged / totalScheduled) * 100).toFixed(1)
             : "0.0";
         const viewLabel = currentView === "study" ? "Study" : "Wellness";
-        const daysTracked = Math.max(0, today - START_DAY + 1);
+
+        // days tracked = from START_DAY to today, excluding holidays
+        let daysTracked = 0;
+        for (let d = START_DAY; d <= today; d++) {
+          if (!isHolidayDay(d)) daysTracked++;
+        }
+
         const daysLeft = 28 - today;
+        const holidaysUsed = countHolidays();
+
+        document.getElementById("holidayCount").textContent = holidaysUsed;
+        document
+          .getElementById("holidayToggleBtn")
+          .classList.toggle("active", isHolidayDay(today));
 
         dashboard.innerHTML = `
           <div class="stat-card" style="--accent-color:#5fd17a">
@@ -1004,6 +1182,11 @@
             <div class="stat-value">${daysLeft}</div>
             <div class="stat-subtext">Feb ${today} → Feb 28</div>
           </div>
+          <div class="stat-card" style="--accent-color:#f5a855">
+            <div class="stat-label">Holidays Taken</div>
+            <div class="stat-value">${holidaysUsed}/5</div>
+            <div class="stat-subtext">${MAX_HOLIDAYS - holidaysUsed} remaining 🌴</div>
+          </div>
         `;
       }
 
@@ -1011,6 +1194,7 @@
         let streak = 0;
         const today = currentDay.getDate();
         for (let day = today; day >= START_DAY; day--) {
+          if (isHolidayDay(day)) continue; // holidays don't break the streak
           const dayTasks = getTasksForDay(day, currentView);
           const allDone = dayTasks.every(
             (t) => progressData[day].tasks[t.id].completed,
@@ -1024,16 +1208,6 @@
       // ─── Daily View ──────────────────────────────────
       function renderDailyView() {
         const day = currentDay.getDate();
-        const dow = getDayOfWeek(day);
-        const dowNames = [
-          "Sunday",
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-        ];
         const dateStr = currentDay.toLocaleDateString("en-US", {
           weekday: "long",
           year: "numeric",
@@ -1044,8 +1218,21 @@
         const sundayBadge = isSunday(day)
           ? `<span class="sunday-badge">🔨 Build Day</span>`
           : "";
+        const holidayBadge = isHolidayDay(day)
+          ? `<span class="holiday-badge">🌴 Holiday</span>`
+          : "";
         document.getElementById("currentDate").innerHTML =
-          dateStr + sundayBadge;
+          dateStr + sundayBadge + holidayBadge;
+
+        // Update holiday button state
+        const btn = document.getElementById("holidayToggleBtn");
+        if (isHolidayDay(day)) {
+          btn.textContent = "✓ Holiday Set";
+          btn.classList.add("active");
+        } else {
+          btn.textContent = "🌴 Take Holiday";
+          btn.classList.remove("active");
+        }
 
         document
           .getElementById("studyBtn")
@@ -1054,9 +1241,26 @@
           .getElementById("wellnessBtn")
           .classList.toggle("active", currentView === "wellness");
 
+        const checklist = document.getElementById("taskChecklist");
+
+        // ── If it's a holiday, show the fun screen ──
+        if (isHolidayDay(day)) {
+          checklist.innerHTML = `
+            <div class="holiday-screen">
+              <div class="holiday-emoji">🏖️</div>
+              <div class="holiday-message">Have fun Sree!</div>
+              <div class="holiday-sub">
+                Today is your well-deserved day off.<br>
+                No tasks, no tracking — just good vibes.
+              </div>
+              <button class="undo-holiday-btn" onclick="toggleHoliday()">↩ Cancel Holiday</button>
+            </div>
+          `;
+          return;
+        }
+
         const dayTasks = getTasksForDay(day, currentView);
         const dayData = progressData[day];
-        const checklist = document.getElementById("taskChecklist");
 
         if (dayTasks.length === 0) {
           checklist.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-secondary)">
@@ -1112,9 +1316,7 @@
       function switchView(view) {
         currentView = view;
         localStorage.setItem("currentView", view);
-        renderDailyView();
-        renderDashboard();
-        renderCalendar();
+        renderAll();
       }
 
       function toggleTask(taskId) {
@@ -1128,9 +1330,7 @@
           td.hoursLogged = 0;
         }
         saveData();
-        renderDailyView();
-        renderDashboard();
-        renderCalendar();
+        renderAll();
       }
 
       function updateHours(taskId, hours) {
@@ -1140,9 +1340,7 @@
         td.hoursLogged = parseFloat(hours) || 0;
         td.completed = td.hoursLogged >= task.scheduledHours;
         saveData();
-        renderDailyView();
-        renderDashboard();
-        renderCalendar();
+        renderAll();
       }
 
       // ─── Calendar ────────────────────────────────────
@@ -1158,39 +1356,57 @@
         const today = new Date().getDate();
         let html = "";
 
-        // Only render START_DAY to 28
         for (let day = START_DAY; day <= 28; day++) {
           const dayData = progressData[day];
-          const dayTasks = getTasksForDay(day, view);
           const dow = getDayOfWeek(day);
           const sun = isSunday(day);
           const isFuture = day > today;
-
-          const done = dayTasks.filter(
-            (t) => dayData.tasks[t.id].completed,
-          ).length;
-          const pct =
-            dayTasks.length > 0
-              ? Math.round((done / dayTasks.length) * 100)
-              : 0;
+          const isHol = isHolidayDay(day);
           const isToday = day === today;
-          const highProd = pct >= 80 && !isFuture;
+
+          let pct = 0,
+            done = 0;
+          if (!isHol) {
+            const dayTasks = getTasksForDay(day, view);
+            done = dayTasks.filter((t) => dayData.tasks[t.id].completed).length;
+            pct =
+              dayTasks.length > 0
+                ? Math.round((done / dayTasks.length) * 100)
+                : 0;
+          }
+
+          const highProd = pct >= 80 && !isFuture && !isHol;
+
+          let calLabel, dotHtml;
+          if (isHol) {
+            calLabel = "🌴";
+            dotHtml = `<div style="font-size:0.7rem;color:var(--accent-orange);">holiday</div>`;
+          } else if (isFuture) {
+            calLabel = "—";
+            const dayTasks = getTasksForDay(day, view);
+            dotHtml = dayTasks
+              .slice(0, 12)
+              .map((t) => `<div class="dot" style="--dot-color:#2a3547"></div>`)
+              .join("");
+          } else {
+            calLabel = pct + "%";
+            const dayTasks = getTasksForDay(day, view);
+            dotHtml = dayTasks
+              .slice(0, 12)
+              .map((t) => {
+                const isDone = dayData.tasks[t.id].completed;
+                return `<div class="dot" style="--dot-color:${isDone ? t.color : "#2a3547"}"></div>`;
+              })
+              .join("");
+          }
 
           html += `
-            <div class="calendar-day ${isToday ? "today" : ""} ${highProd ? "high-productivity" : ""} ${sun ? "sunday-day" : ""} ${isFuture ? "future-day" : ""}"
-                 onclick="goToDayWithView(${day}, '${view}')">
+            <div class="calendar-day ${isToday ? "today" : ""} ${highProd ? "high-productivity" : ""} ${sun ? "sunday-day" : ""} ${isFuture ? "future-day" : ""} ${isHol ? "holiday-day" : ""}"
+                 onclick="${isFuture ? "" : `goToDayWithView(${day}, '${view}')`}">
               <div class="day-number">${day}</div>
               <div class="day-dow">${DOW_SHORT[dow]}</div>
-              <div class="day-completion">${isFuture ? "—" : pct + "%"}</div>
-              <div class="day-dots">
-                ${dayTasks
-                  .slice(0, 12)
-                  .map((t) => {
-                    const isDone = !isFuture && dayData.tasks[t.id].completed;
-                    return `<div class="dot" style="--dot-color:${isDone ? t.color : "#2a3547"}"></div>`;
-                  })
-                  .join("")}
-              </div>
+              <div class="day-completion">${calLabel}</div>
+              <div class="day-dots">${dotHtml}</div>
             </div>
           `;
         }
@@ -1202,28 +1418,24 @@
         const nd = currentDay.getDate() + delta;
         if (nd >= START_DAY && nd <= 28) {
           currentDay = new Date(2026, 1, nd);
-          renderDailyView();
-          renderDashboard();
+          renderAll();
         }
       }
 
       function goToToday() {
         const today = new Date();
-        if (today.getFullYear() === 2026 && today.getMonth() === 1) {
-          currentDay = today;
-        } else {
-          currentDay = new Date(2026, 1, START_DAY);
-        }
-        renderDailyView();
-        renderDashboard();
+        currentDay =
+          today.getFullYear() === 2026 && today.getMonth() === 1
+            ? today
+            : new Date(2026, 1, START_DAY);
+        renderAll();
       }
 
       function goToDayWithView(day, view) {
         currentDay = new Date(2026, 1, day);
         currentView = view;
         localStorage.setItem("currentView", view);
-        renderDailyView();
-        renderDashboard();
+        renderAll();
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
@@ -1249,15 +1461,17 @@
         localStorage.removeItem("februaryProgress2026v2");
         progressData = initializeMonth();
         saveData();
+        renderAll();
+      }
+
+      // ─── Init ────────────────────────────────────────
+      function renderAll() {
         renderDashboard();
         renderDailyView();
         renderCalendar();
       }
 
-      // ─── Init ────────────────────────────────────────
-      renderDashboard();
-      renderDailyView();
-      renderCalendar();
+      renderAll();
     </script>
   </body>
 </html>
