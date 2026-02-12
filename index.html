@@ -503,6 +503,17 @@
         border-color: rgba(179, 136, 255, 0.3);
       }
 
+      .calendar-day.future-day {
+        opacity: 0.4;
+        cursor: default;
+      }
+
+      .calendar-day.future-day:hover {
+        transform: none;
+        border-color: var(--border);
+        box-shadow: none;
+      }
+
       .day-number {
         font-family: "Space Mono", monospace;
         font-size: 1.2rem;
@@ -890,11 +901,13 @@
       ];
 
       // ─── Data ───────────────────────────────────────
+      const START_DAY = 12; // Tracking starts Feb 12
+
       let progressData = loadProgressData();
       let currentDay = new Date();
-      // Clamp currentDay to February 2026
+      // Clamp currentDay to February 2026, minimum START_DAY
       if (currentDay.getFullYear() !== 2026 || currentDay.getMonth() !== 1) {
-        currentDay = new Date(2026, 1, 12); // default to mid-month
+        currentDay = new Date(2026, 1, START_DAY);
       }
       let currentView = localStorage.getItem("currentView") || "study";
 
@@ -942,7 +955,8 @@
           lazyHours = 0,
           consistentDays = 0;
 
-        for (let day = 1; day <= today; day++) {
+        // Only count from START_DAY onwards
+        for (let day = START_DAY; day <= today; day++) {
           const dayTasks = getTasksForDay(day, currentView);
           let dayDone = true;
           dayTasks.forEach((task) => {
@@ -961,6 +975,8 @@
             ? ((totalLogged / totalScheduled) * 100).toFixed(1)
             : "0.0";
         const viewLabel = currentView === "study" ? "Study" : "Wellness";
+        const daysTracked = Math.max(0, today - START_DAY + 1);
+        const daysLeft = 28 - today;
 
         dashboard.innerHTML = `
           <div class="stat-card" style="--accent-color:#5fd17a">
@@ -971,17 +987,22 @@
           <div class="stat-card" style="--accent-color:#74e4f7">
             <div class="stat-label">${viewLabel} Consistency</div>
             <div class="stat-value">${pct}%</div>
-            <div class="stat-subtext">${consistentDays} fully consistent day${consistentDays !== 1 ? "s" : ""}</div>
+            <div class="stat-subtext">${consistentDays} of ${daysTracked} day${daysTracked !== 1 ? "s" : ""} complete</div>
           </div>
           <div class="stat-card" style="--accent-color:#f37373">
             <div class="stat-label">${viewLabel} Lazy Hours</div>
             <div class="stat-value">${lazyHours.toFixed(1)}</div>
-            <div class="stat-subtext">Hours not logged</div>
+            <div class="stat-subtext">Hours not logged since Feb 12</div>
           </div>
           <div class="stat-card" style="--accent-color:#fd8fe4">
             <div class="stat-label">${viewLabel} Streak</div>
             <div class="stat-value">${calculateStreak()}</div>
             <div class="stat-subtext">consecutive days</div>
+          </div>
+          <div class="stat-card" style="--accent-color:#fff27a">
+            <div class="stat-label">Days Remaining</div>
+            <div class="stat-value">${daysLeft}</div>
+            <div class="stat-subtext">Feb ${today} → Feb 28</div>
           </div>
         `;
       }
@@ -989,7 +1010,7 @@
       function calculateStreak() {
         let streak = 0;
         const today = currentDay.getDate();
-        for (let day = today; day >= 1; day--) {
+        for (let day = today; day >= START_DAY; day--) {
           const dayTasks = getTasksForDay(day, currentView);
           const allDone = dayTasks.every(
             (t) => progressData[day].tasks[t.id].completed,
@@ -1137,11 +1158,13 @@
         const today = new Date().getDate();
         let html = "";
 
-        for (let day = 1; day <= 28; day++) {
+        // Only render START_DAY to 28
+        for (let day = START_DAY; day <= 28; day++) {
           const dayData = progressData[day];
           const dayTasks = getTasksForDay(day, view);
           const dow = getDayOfWeek(day);
           const sun = isSunday(day);
+          const isFuture = day > today;
 
           const done = dayTasks.filter(
             (t) => dayData.tasks[t.id].completed,
@@ -1151,19 +1174,19 @@
               ? Math.round((done / dayTasks.length) * 100)
               : 0;
           const isToday = day === today;
-          const highProd = pct >= 80;
+          const highProd = pct >= 80 && !isFuture;
 
           html += `
-            <div class="calendar-day ${isToday ? "today" : ""} ${highProd ? "high-productivity" : ""} ${sun ? "sunday-day" : ""}"
+            <div class="calendar-day ${isToday ? "today" : ""} ${highProd ? "high-productivity" : ""} ${sun ? "sunday-day" : ""} ${isFuture ? "future-day" : ""}"
                  onclick="goToDayWithView(${day}, '${view}')">
               <div class="day-number">${day}</div>
               <div class="day-dow">${DOW_SHORT[dow]}</div>
-              <div class="day-completion">${pct}%</div>
+              <div class="day-completion">${isFuture ? "—" : pct + "%"}</div>
               <div class="day-dots">
                 ${dayTasks
                   .slice(0, 12)
                   .map((t) => {
-                    const isDone = dayData.tasks[t.id].completed;
+                    const isDone = !isFuture && dayData.tasks[t.id].completed;
                     return `<div class="dot" style="--dot-color:${isDone ? t.color : "#2a3547"}"></div>`;
                   })
                   .join("")}
@@ -1177,7 +1200,7 @@
       // ─── Navigation ──────────────────────────────────
       function changeDay(delta) {
         const nd = currentDay.getDate() + delta;
-        if (nd >= 1 && nd <= 28) {
+        if (nd >= START_DAY && nd <= 28) {
           currentDay = new Date(2026, 1, nd);
           renderDailyView();
           renderDashboard();
@@ -1189,7 +1212,7 @@
         if (today.getFullYear() === 2026 && today.getMonth() === 1) {
           currentDay = today;
         } else {
-          currentDay = new Date(2026, 1, 12);
+          currentDay = new Date(2026, 1, START_DAY);
         }
         renderDailyView();
         renderDashboard();
